@@ -8,7 +8,7 @@ AC::GridColorRenderer::GridColorRenderer(QWidget *parent) : QGridLayout(parent)
     FillGrid();
 }
 
-void AC::GridColorRenderer::StartPreview(){
+void AC::GridColorRenderer::Start(){
     if(_threadActive || !_isGridFilled)
         return;
 
@@ -16,7 +16,7 @@ void AC::GridColorRenderer::StartPreview(){
     _processThread = std::thread(SetColors, this, _manager, _settings, &_threadActive);
 }
 
-void AC::GridColorRenderer::StopPreview(){
+void AC::GridColorRenderer::Stop(){
     if(!_threadActive)
         return;
 

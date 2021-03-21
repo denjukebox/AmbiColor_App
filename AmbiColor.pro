@@ -18,15 +18,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     Capture/buffermanager.cpp \
     Capture/averagecolor.cpp \
+    Capture/divisionthreader.cpp \
     Capture/framedivider.cpp \
     Capture/framegrabber.cpp \
     Capture/framewrapper.cpp \
-    Capture/previewthreader.cpp \
     Capture/resultwrapper.cpp \
     Capture/teensythreader.cpp \
     Connector/teensylightconnector.cpp \
     Controls/gridcolorrenderer.cpp \
     Controls/simplerectangle.cpp \
+    Util/logger.cpp \
     Util/settings.cpp \
     Util/statistics.cpp \
     Views/mainwindow.cpp \
@@ -38,17 +39,18 @@ SOURCES += \
 HEADERS += \
     Capture/buffermanager.h \
     Capture/averagecolor.h \
+    Capture/divisionthreader.h \
     Capture/enums.h \
     Capture/framedivider.h \
     Capture/framegrabber.h \
     Capture/framewrapper.h \
-    Capture/previewthreader.h \
     Capture/resultwrapper.h \
     Capture/teensythreader.h \
     Connector/teensylightconnector.h \
     Controls/gridcolorrenderer.h \
     Controls/simplerectangle.h \
     Util/hidapi.h \
+    Util/logger.h \
     Util/settings.h \
     Util/statistics.h \
     Views/configuration.h \

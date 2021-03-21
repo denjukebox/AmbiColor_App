@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "Controls/gridcolorrenderer.h"
-#include "Capture/previewthreader.h"
+#include "Capture/divisionthreader.h"
 #include "Util/settings.h"
 
 using namespace AC;
@@ -25,13 +25,13 @@ protected:
     void hideEvent(QHideEvent *event);
 
 private:
-    void StartPreview();
-    void StopPreview();
+    void Start();
+    void Stop();
 
     Settings *_settings = &Settings::Instance();
     Ui::PreviewDialog *_ui;
     GridColorRenderer *_grid = new GridColorRenderer(this);
-    PreviewThreader _previewThreader = PreviewThreader();
+    DivisionThreader _divisionThreader = DivisionThreader();
 
     bool _isRunning = false;
 };

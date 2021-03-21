@@ -4,6 +4,7 @@
 #include "ScreenCapture.h"
 #include "framewrapper.h"
 #include "resultwrapper.h"
+#include "Util/statistics.h"
 #include <queue>
 #include <mutex>
 
@@ -22,17 +23,17 @@ namespace AC
 
         bool QueueFrame(const Screen_Capture::Image &img);
         FrameWrapper* GetFreeFrame();
-        void CleanFrame(FrameWrapper* frameRef);
-        void ReuseFrame(FrameWrapper* frameRef);
+        bool CleanFrame(FrameWrapper* frameRef);
+        bool ReuseFrame(FrameWrapper* frameRef);
         int GetPosition(FrameWrapper* frameRef);
 
-        void QueueResult(vector<QColor> topColors,
+        bool QueueResult(vector<QColor> topColors,
                         vector<QColor> bottomColors,
                         vector<QColor> leftColors,
                         vector<QColor> rightColors);
         ResultWrapper* GetFreeResult();
-        void CleanResult(ResultWrapper* resultRef);
-        void ReuseResult(ResultWrapper* resultRef);
+        bool CleanResult(ResultWrapper* resultRef);
+        bool ReuseResult(ResultWrapper* resultRef);
         int GetPosition(ResultWrapper* resultRef);
 
     private:

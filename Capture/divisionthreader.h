@@ -1,30 +1,36 @@
-#ifndef DIVIDETHREADER_H
-#define DIVIDETHREADER_H
+#ifndef DIVISIONTHREADER_H
+#define DIVISIONTHREADER_H
 
-#include "buffermanager.h"
-#include "framedivider.h"
-#include "Util/statistics.h"
-#include "teensythreader.h"
-#include "Util/settings.h"
-#include "enums.h"
+#include <iostream>
 #include <thread>
 #include <chrono>
+#include <future>
+#include <typeinfo>
+#include "buffermanager.h"
+#include "framedivider.h"
+#include "teensythreader.h"
+#include "Util/statistics.h"
+#include "Util/settings.h"
+#include "Util/logger.h"
+#include "enums.h"
 
 using namespace std;
 using namespace SL;
 
 namespace AC {
-    class PreviewThreader
+    class DivisionThreader
     {
 
     public:
-        PreviewThreader();
+        DivisionThreader();
 
-        void StopThread();
-        void StartThread();
+        void Stop();
+        void Start();
+        bool IsRunning();
 
     private:
-        static void DivideFrame(FrameDivider *divider, BufferManager *manager, Settings *settings, bool *threadActive);
+        static void Thread(FrameDivider *divider, BufferManager *manager, Settings *settings, bool *threadActive);
+        static void DivideFrame(FrameDivider *divider, FrameWrapper *frame, BufferManager *manager, Settings *settings);
 
         static vector<QColor> CalculateTop(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);
         static vector<QColor> CalculateBottom(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);
@@ -40,4 +46,4 @@ namespace AC {
     };
 }
 
-#endif // DIVIDETHREADER_H
+#endif // DIVISIONTHREADER_H

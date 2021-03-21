@@ -7,6 +7,7 @@ AC::FrameDivider::FrameDivider()
 vector<QColor> AC::FrameDivider::CalculateHorizontalRow(vector<Screen_Capture::ImageBGRA>::iterator imgRef, unsigned int blocksWidth, unsigned int imageWidth, unsigned int offsetHeight, unsigned int depth, unsigned int pixelPerblock)
 {
     vector<QColor> colors;
+
     for(unsigned int blockPos = 0; blockPos < blocksWidth; blockPos++)
     {
         colors.push_back(CalculateHorizontalPixel(
@@ -23,6 +24,7 @@ vector<QColor> AC::FrameDivider::CalculateHorizontalRow(vector<Screen_Capture::I
 vector<QColor> AC::FrameDivider::CalculateVerticalRow(vector<Screen_Capture::ImageBGRA>::iterator imgRef, unsigned int blocksHeight, unsigned int imageWidth, unsigned int imageHeight, unsigned int offsetWidth, unsigned int depth, unsigned int pixelPerblock)
 {
     vector<QColor> colors;
+
     for(unsigned int blockPos = 0; blockPos < blocksHeight; blockPos++)
     {
         colors.push_back(CalculateVerticalPixel(
@@ -60,6 +62,7 @@ QColor AC::FrameDivider::CalculateVerticalPixel(vector<Screen_Capture::ImageBGRA
 {
     AverageColor color;
     vector<Screen_Capture::ImageBGRA> relevantColors;
+
     auto blockOffset = blockPos * pixelPerblockHeight;
     if(imageHeight < blockOffset + pixelPerblockHeight)
         pixelPerblockHeight = imageHeight - blockOffset;

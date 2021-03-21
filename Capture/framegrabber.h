@@ -6,6 +6,7 @@
 #include "buffermanager.h"
 #include "Util/statistics.h"
 #include "Util/settings.h"
+#include "Util/logger.h"
 #include "Views/configuration.h"
 #include "ScreenCapture.h"
 #include <algorithm>

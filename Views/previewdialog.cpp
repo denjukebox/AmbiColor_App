@@ -9,34 +9,34 @@ PreviewDialog::PreviewDialog(QWidget *parent) :
 }
 
 void PreviewDialog::showEvent(QShowEvent *event) {
-    StartPreview();
+    Start();
 }
 
 void PreviewDialog::hideEvent(QHideEvent *event) {
-    StopPreview();
+    Stop();
 }
 
-void PreviewDialog::StartPreview(){
+void PreviewDialog::Start(){
     if(_isRunning)
         return;
 
-    _previewThreader.StartThread();
-    _grid->StartPreview();
+    _divisionThreader.Start();
+    _grid->Start();
     _isRunning = true;
 }
 
-void PreviewDialog::StopPreview(){
+void PreviewDialog::Stop(){
     if(!_isRunning)
         return;
 
-    _grid->StopPreview();
-    _previewThreader.StopThread();
+    _grid->Stop();
+    _divisionThreader.Stop();
     _isRunning = false;
 }
 
 
 PreviewDialog::~PreviewDialog()
 {
-    StopPreview();
+    Stop();
     delete _ui;
 }

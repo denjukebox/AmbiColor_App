@@ -29,6 +29,7 @@ bool AC::BufferManager::QueueFrame(const SL::Screen_Capture::Image &img){
         _usedFrames.pop();
         wrapper->CopyImageToBuffer(img);
         _freeFrames.push(wrapper);
+        Statistics::Instance().NextQueued(Statistics::StatisticType::Frame);
         return true;
     }  catch (const exception& ex) {
         return false;
@@ -42,6 +43,7 @@ AC::FrameWrapper* AC::BufferManager::GetFreeFrame(){
         lock_guard<mutex> guard(_frameLock);
         auto wrapper = _freeFrames.front();
         _freeFrames.pop();
+        Statistics::Instance().NextConsumed(Statistics::StatisticType::Frame);
         return wrapper;
     }  catch (const exception& ex) {
         return nullptr;
@@ -52,15 +54,25 @@ int AC::BufferManager::GetPosition(FrameWrapper* frameRef){
     return distance(&_framesStack.front(), frameRef);
 }
 
-void AC::BufferManager::CleanFrame(FrameWrapper* frameRef){
-    _usedFrames.push(frameRef);
+bool AC::BufferManager::CleanFrame(FrameWrapper* frameRef){
+    try {
+        _usedFrames.push(frameRef);
+        return true;
+    }   catch (const exception& ex) {
+        return false;
+    }
 }
 
-void AC::BufferManager::ReuseFrame(FrameWrapper* frameRef){
-    _freeFrames.push(frameRef);
+bool AC::BufferManager::ReuseFrame(FrameWrapper* frameRef){
+    try {
+        _freeFrames.push(frameRef);
+        return true;
+    }   catch (const exception& ex) {
+        return false;
+    }
 }
 
-void AC::BufferManager::QueueResult(
+bool AC::BufferManager::QueueResult(
         vector<QColor> topColors,
         vector<QColor> bottomColors,
         vector<QColor> leftColors,
@@ -74,7 +86,10 @@ void AC::BufferManager::QueueResult(
         _usedResults.pop();
         wrapper->CopyColorsToWrapper(&topColors, &bottomColors, &leftColors, &rightColors);
         _freeResults.push(wrapper);
+        Statistics::Instance().NextQueued(Statistics::StatisticType::Result);
+        return true;
     }  catch (const exception& ex) {
+        return false;
     }
 }
 
@@ -85,19 +100,29 @@ AC::ResultWrapper* AC::BufferManager::GetFreeResult(){
         lock_guard<mutex> guard(_resultLock);
         auto wrapper = _freeResults.front();
         _freeResults.pop();
+        Statistics::Instance().NextConsumed(Statistics::StatisticType::Result);
         return wrapper;
     }  catch (const exception& ex) {
         return nullptr;
     }
 }
 
-void AC::BufferManager::CleanResult(ResultWrapper* resultRef){
-    _usedResults.push(resultRef);
+bool AC::BufferManager::CleanResult(ResultWrapper* resultRef){
+    try {
+        _usedResults.push(resultRef);
+        return true;
+    }   catch (const exception& ex) {
+        return false;
+    }
 }
 
-
-void AC::BufferManager::ReuseResult(ResultWrapper* resultRef){
-    _freeResults.push(resultRef);
+bool AC::BufferManager::ReuseResult(ResultWrapper* resultRef){
+    try {
+        _freeResults.push(resultRef);
+        return true;
+    }   catch (const exception& ex) {
+        return false;
+    }
 }
 
 int AC::BufferManager::GetPosition(ResultWrapper* resultRef){

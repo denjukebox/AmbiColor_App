@@ -21,8 +21,8 @@ namespace AC {
         explicit GridColorRenderer(QWidget *parent);
         ~GridColorRenderer();
 
-        void StartPreview();
-        void StopPreview();
+        void Start();
+        void Stop();
 
     signals:
         void WorkDone();

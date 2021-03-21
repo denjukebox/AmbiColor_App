@@ -91,15 +91,17 @@ void MainWindow::ExitApp()
 
 void MainWindow::ToggleBroadCast(){
     const char* text;
-    if(_teensyThreader.IsRunning()){
+    if(_connector->IsConnected()){
         text = "Stopped Broadcast";
-        _teensyThreader.StopBroadcast();
+        _divisionThreader.Stop();
+        _connector->StopBroadcast();
         _connector->CloseDevice();
         _ui->actionStartStopBroadcast->setText("Start Cast");
     }
     else {
         if(_connector->OpenDevice() && _connector->ConfigureDevice()){
-            _teensyThreader.StartBroadcast();
+            _divisionThreader.Start();
+            _connector->StartBroadcast();
             _ui->actionStartStopBroadcast->setText("Stop Cast");
             text = "Started Broadcast";
         }
@@ -109,12 +111,13 @@ void MainWindow::ToggleBroadCast(){
     }
 
     ShowTrayMessage("AmbiColor",text, QSystemTrayIcon::MessageIcon::Information);
+    Logger::WriteActivity(typeid(this), text);
     _ui->statusbar->showMessage(text);
 }
 
 void MainWindow::exit()
 {
-    _teensyThreader.StopBroadcast();
+    _connector->StopBroadcast();
     _framegrabber.StopCapture();
     _connector->CloseDevice();
     QCoreApplication::quit();

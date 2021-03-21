@@ -67,8 +67,8 @@ private:
     StatisticsDialog *_statisticsDialog = new StatisticsDialog(this);
 
     FrameGrabber _framegrabber = FrameGrabber();
+    DivisionThreader _divisionThreader = DivisionThreader();
     TeensyLightConnector *_connector = new TeensyLightConnector();
-    TeensyThreader _teensyThreader = TeensyThreader(_connector);
 
     QAction *restoreAction;
 

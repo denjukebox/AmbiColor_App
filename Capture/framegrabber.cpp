@@ -9,7 +9,7 @@ void AC::FrameGrabber::StartCapture(){
     if(_isRunning)
         StopCapture();
 
-    cout << "FRAMEGRABBER:Started" << endl;
+    Logger::WriteActivity(typeid(this), "Started");
     _grabber = Screen_Capture::CreateCaptureConfiguration([&](){return vector<Screen_Capture::Monitor>{_monitor};})
     ->onNewFrame([&](const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
         ProcessCapturedFrame(_manager, img, monitor);
@@ -24,7 +24,7 @@ void AC::FrameGrabber::StopCapture()
     if(_grabber != nullptr){
         _grabber->pause();
         _grabber = nullptr;
-        cout << "FRAMEGRABBER:Stopped" << endl;
+        Logger::WriteActivity(typeid(this), "Stopped");
     }
     _isRunning = false;
 }
@@ -36,7 +36,7 @@ void AC::FrameGrabber::ProcessCapturedFrame(BufferManager *manager, const Screen
 
 void AC::FrameGrabber::SetMonitor(Screen_Capture::Monitor monitor){
     _monitor = monitor;    
-    cout << "FRAMEGRABBER:SetMonitor" << monitor.Name << endl;
+    Logger::WriteActivity(typeid(this), "SetMonitor");
 }
 
 bool AC::FrameGrabber::IsRunning()

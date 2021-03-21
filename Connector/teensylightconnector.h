@@ -18,6 +18,7 @@
 #include <Views/configuration.h>
 #include "Util/settings.h"
 #include "Util/statistics.h"
+#include "Util/logger.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -35,6 +36,9 @@ namespace AC {
         TeensyLightConnector();        
         ~TeensyLightConnector();
 
+        bool StartBroadcast();
+        bool StopBroadcast();
+
         bool OpenDevice();
         bool CloseDevice();
 
@@ -42,34 +46,41 @@ namespace AC {
 
         bool IsConnected();
 
-        bool PushOnSendQueue(char command);
-        bool PushOnSendQueue(char command, vector<unsigned char>::iterator start, vector<unsigned char>::iterator end);
-        bool PushOnSendQueue(const vector<unsigned char> buffer);
-
     private:
-        static void SendBuffer(int _portHandle, queue<vector<unsigned char>> *sendQueue,mutex* sendMutex, bool *threadActive);
-        static bool PushToTeensy(int _portHandle, vector<unsigned char>::iterator start, vector<unsigned char>::iterator end);
 
-        void PushIntOnBuffer(vector<unsigned char> *buffer, int num);
+        static void Thread(int portHandle, BufferManager *manager, Settings *settings, bool *threadActive);
+        static void ProccessResult(ResultWrapper *wrapper, unsigned char *buffer, Settings *settings);
+        static bool PushToTeensy(int _portHandle, unsigned char *buffer, long size);
 
-        int GetBufferSize();
+        static unsigned long PushColorsOnBuffer(unsigned char *buffer, unsigned long bufferOffset, vector<QColor>::iterator colors, unsigned long colorsLength, ColorOrder order);
+        static void ApplyCorrection(vector<QColor>::iterator colors, unsigned long colorsLength, double brightnessFactor, double redFactor, double greenFactor, double blueFactor);
+
+        static unsigned long PushIntOnBuffer(unsigned char *buffer, unsigned long offset, int num);
+        static unsigned long PushOrderOnBuffer(unsigned char *buffer, unsigned long offset, Direction dir);
+        static unsigned long PushOnBuffer(unsigned char *buffer, unsigned long bufferOffset, char value);
 
         const char* SERIAL_DEV = "/dev/ttyACM0";
 
-        const unsigned int QUEUE_SIZE_MAX = 20;
-        const unsigned int INITAL_BUFFER_SIZE = 64;
-
         Settings *_settings = &Settings::Instance();
+        BufferManager* _manager = &BufferManager::Instance();
 
         struct termios _teensyHandle;
         int _portHandle;
         bool _deviceConfigured = false;
 
-        queue<vector<unsigned char>> _sendQueue;
 
         thread _processThread;
         bool _threadActive = false;
-        mutex _sendQueueMutex;
+
+//        int GetBufferSize();
+//        const unsigned int QUEUE_SIZE_MAX = 20;
+//        const unsigned int INITAL_BUFFER_SIZE = 64;
+//        bool PushOnSendQueue(char command);
+//        bool PushOnSendQueue(char command, vector<unsigned char>::iterator start, vector<unsigned char>::iterator end);
+//        bool PushOnSendQueue(const vector<unsigned char> buffer);
+//        mutex _sendQueueMutex;
+//        queue<vector<unsigned char>> _sendQueue;
+//          static void SendBuffer(int _portHandle, queue<vector<unsigned char>> *sendQueue,mutex* sendMutex, bool *threadActive);
     };
 }
 #endif // TEENSYLIGHTCONNECTOR_H
