@@ -37,7 +37,7 @@ namespace AC {
         ResultManager *_resultManager;
         Settings *_settings = &Settings::Instance();
 
-        bool _threadActive;
+        bool _threadActive = false;
         std::thread _processThread;
 
         static void SetColors(GridColorRenderer *self, ResultManager *resultManager, Settings *settings, bool *threadActive);

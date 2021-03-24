@@ -38,24 +38,3 @@ bool AC::ResultManager::Queue(
         return false;
     }
 }
-
-AC::TimeManager::TimeManager(){
-    _logType = Statistics::StatisticType::Result;
-}
-
-bool AC::TimeManager::Queue(
-        vector<QColor> topColors,
-        vector<QColor> bottomColors,
-        vector<QColor> leftColors,
-        vector<QColor> rightColors){
-    try {
-        auto wrapper = this->Buffer::GetUsed();
-        if(wrapper != nullptr){
-            wrapper->CopyColorsToWrapper(&topColors, &bottomColors, &leftColors, &rightColors);
-            this->Buffer::Push(wrapper);
-        }
-        return true;
-    }  catch (const exception& ex) {
-        return false;
-    }
-}

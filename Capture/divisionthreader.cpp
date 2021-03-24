@@ -49,20 +49,18 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
         auto depth = settings->GetDepth();
         auto ratio =  settings->GetContentRatio();
 
-//        auto asyncTop = async(launch::async, CalculateTop, divider, frame, width, depth, ratio);
-//        auto asyncBottom = async(launch::async, CalculateBottom, divider, frame, width, depth, ratio);
-//        auto asyncLeft = async(launch::async, CalculateLeft, divider, frame, height, depth, ratio);
-//        auto asyncRight = async(launch::async, CalculateRight, divider, frame, height, depth, ratio);
+        auto asyncTop = async(launch::async, CalculateTop, divider, frame, width, depth, ratio);
+        auto asyncBottom = async(launch::async, CalculateBottom, divider, frame, width, depth, ratio);
+        auto asyncLeft = async(launch::async, CalculateLeft, divider, frame, height, depth, ratio);
+        auto asyncRight = async(launch::async, CalculateRight, divider, frame, height, depth, ratio);
 
-        auto top = CalculateTop( divider, frame, width, depth, ratio);
-        auto bottom = CalculateBottom( divider, frame, width, depth, ratio);
-        auto left = CalculateLeft( divider, frame, height, depth, ratio);
-        auto right = CalculateRight( divider, frame, height, depth, ratio);
-
-        timeManager->Queue(top,bottom,left,right);
+        auto top = asyncTop.get();// CalculateTop( divider, frame, width, depth, ratio);
+        auto bottom = asyncBottom.get();// CalculateBottom( divider, frame, width, depth, ratio);
+        auto left = asyncLeft.get();// CalculateLeft( divider, frame, height, depth, ratio);
+        auto right = asyncRight.get();// CalculateRight( divider, frame, height, depth, ratio);
 
         ResultWrapper* pastframe;
-        for(auto pos = 0; pos < 5; pos++ ){
+        for(auto pos = 0; pos < 10; pos++ ){
             pastframe = timeManager->GetFree();
             if(pastframe == nullptr){
                 timeManager->Push(timeManager->GetUsed());
@@ -76,6 +74,7 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
             }
         }
 
+        timeManager->Queue(top,bottom,left,right);
         resultManager->Queue(top,bottom,left,right);
 }
 
@@ -83,9 +82,9 @@ void AC::DivisionThreader::AverageColors(vector<QColor> *result1, vector<QColor>
     if(result1->size() != size)
         return;
     for(unsigned long pos = 0; pos < result1->size(); pos++){
-        result1->at(pos).setRedF(result1->at(pos).redF() + result2[pos].redF());
-        result1->at(pos).setGreenF(result1->at(pos).greenF() + result2[pos].greenF());
-        result1->at(pos).setBlueF(result1->at(pos).blueF() + result2[pos].blueF());
+        result1->at(pos).setRedF((result1->at(pos).redF() + result2[pos].redF()) / 2);
+        result1->at(pos).setGreenF((result1->at(pos).greenF() + result2[pos].greenF()) / 2);
+        result1->at(pos).setBlueF((result1->at(pos).blueF() + result2[pos].blueF()) / 2);
     }
 }
 

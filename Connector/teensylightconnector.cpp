@@ -201,24 +201,24 @@ unsigned long AC::TeensyLightConnector::PushColorsOnBuffer(unsigned char *buffer
     for(unsigned long pos = 0; pos < colorsLength; pos++){
         switch (order) {
             case ColorOrder::RGB:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].blue()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
                 break;
             case ColorOrder::RBG:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].blue()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].green()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
                 break;
             case ColorOrder::GRB:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].blue()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
                 break;
             case ColorOrder::GBR:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].blue()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[pos].red()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
+                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
                 break;
         }
     }
