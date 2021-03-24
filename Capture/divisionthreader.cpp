@@ -82,9 +82,9 @@ void AC::DivisionThreader::AverageColors(vector<QColor> *result1, vector<QColor>
     if(result1->size() != size)
         return;
     for(unsigned long pos = 0; pos < result1->size(); pos++){
-        result1->at(pos).setRedF((result1->at(pos).redF() + result2[pos].redF()) / 2);
-        result1->at(pos).setGreenF((result1->at(pos).greenF() + result2[pos].greenF()) / 2);
-        result1->at(pos).setBlueF((result1->at(pos).blueF() + result2[pos].blueF()) / 2);
+        result1->at(pos).setRed((result1->at(pos).red() + result2[pos].red()) / 2);
+        result1->at(pos).setGreen((result1->at(pos).green() + result2[pos].green()) / 2);
+        result1->at(pos).setBlue((result1->at(pos).blue() + result2[pos].blue()) / 2);
     }
 }
 
