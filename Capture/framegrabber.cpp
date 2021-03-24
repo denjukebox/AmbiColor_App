@@ -1,7 +1,8 @@
 #include "framegrabber.h"
 
-AC::FrameGrabber::FrameGrabber()
+AC::FrameGrabber::FrameGrabber(FrameManager *frameManager)
 {
+    _frameManager = frameManager;
     _monitor = Screen_Capture::GetMonitors().at(0);
 }
 
@@ -12,7 +13,7 @@ void AC::FrameGrabber::StartCapture(){
     Logger::WriteActivity(typeid(this), "Started");
     _grabber = Screen_Capture::CreateCaptureConfiguration([&](){return vector<Screen_Capture::Monitor>{_monitor};})
     ->onNewFrame([&](const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
-        ProcessCapturedFrame(_manager, img, monitor);
+        ProcessCapturedFrame(_frameManager, img, monitor);
     })->start_capturing();
 
     _grabber->setFrameChangeInterval(_settings->GetCaptureRate());
@@ -29,8 +30,8 @@ void AC::FrameGrabber::StopCapture()
     _isRunning = false;
 }
 
-void AC::FrameGrabber::ProcessCapturedFrame(BufferManager *manager, const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
-    if(manager->QueueFrame(img))
+void AC::FrameGrabber::ProcessCapturedFrame(FrameManager *frameManager, const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
+    if(frameManager->Queue(img))
         Statistics::Instance().NextQueued(Statistics::StatisticType::Frame);
 }
 

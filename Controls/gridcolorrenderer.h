@@ -6,7 +6,7 @@
 #include "simplerectangle.h"
 #include "Capture/averagecolor.h"
 #include "Capture/resultwrapper.h"
-#include "Capture/buffermanager.h"
+#include "Capture/buffers.h"
 #include "Util/statistics.h"
 #include "Util/settings.h"
 
@@ -18,7 +18,7 @@ namespace AC {
         Q_OBJECT
 
     public:
-        explicit GridColorRenderer(QWidget *parent);
+        explicit GridColorRenderer(ResultManager *resultManager, QWidget *parent);
         ~GridColorRenderer();
 
         void Start();
@@ -34,13 +34,13 @@ namespace AC {
         void paintEvent(QPaintEvent *event);
 
     private:
-        BufferManager *_manager = &BufferManager::Instance();
+        ResultManager *_resultManager;
         Settings *_settings = &Settings::Instance();
 
         bool _threadActive;
         std::thread _processThread;
 
-        static void SetColors(GridColorRenderer *self, BufferManager *manager, Settings *settings, bool *threadActive);
+        static void SetColors(GridColorRenderer *self, ResultManager *resultManager, Settings *settings, bool *threadActive);
         void static PushColorsToGrid(vector<QColor>::iterator colors, vector<SimpleRectangle*> rectangles);
 
         vector<SimpleRectangle*> FillHorizontal(vector<SimpleRectangle*> rectangles, int verticalStart, int verticalOffset);

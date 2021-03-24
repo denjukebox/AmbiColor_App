@@ -13,7 +13,7 @@
 
 #include <QColor>
 #include <Capture/averagecolor.h>
-#include <Capture/buffermanager.h>
+#include <Capture/buffers.h>
 #include "Capture/enums.h"
 #include <Views/configuration.h>
 #include "Util/settings.h"
@@ -33,7 +33,7 @@ namespace AC {
     {
 
     public:
-        TeensyLightConnector();        
+        TeensyLightConnector(ResultManager *resultManager);
         ~TeensyLightConnector();
 
         bool StartBroadcast();
@@ -48,7 +48,7 @@ namespace AC {
 
     private:
 
-        static void Thread(int portHandle, BufferManager *manager, Settings *settings, bool *threadActive);
+        static void Thread(int portHandle, ResultManager *resultManager, Settings *settings, bool *threadActive);
         static void ProccessResult(ResultWrapper *wrapper, unsigned char *buffer, Settings *settings);
         static bool PushToTeensy(int _portHandle, unsigned char *buffer, long size);
 
@@ -62,7 +62,7 @@ namespace AC {
         const char* SERIAL_DEV = "/dev/ttyACM0";
 
         Settings *_settings = &Settings::Instance();
-        BufferManager* _manager = &BufferManager::Instance();
+        ResultManager *_resultManager;
 
         struct termios _teensyHandle;
         int _portHandle;
@@ -71,16 +71,6 @@ namespace AC {
 
         thread _processThread;
         bool _threadActive = false;
-
-//        int GetBufferSize();
-//        const unsigned int QUEUE_SIZE_MAX = 20;
-//        const unsigned int INITAL_BUFFER_SIZE = 64;
-//        bool PushOnSendQueue(char command);
-//        bool PushOnSendQueue(char command, vector<unsigned char>::iterator start, vector<unsigned char>::iterator end);
-//        bool PushOnSendQueue(const vector<unsigned char> buffer);
-//        mutex _sendQueueMutex;
-//        queue<vector<unsigned char>> _sendQueue;
-//          static void SendBuffer(int _portHandle, queue<vector<unsigned char>> *sendQueue,mutex* sendMutex, bool *threadActive);
     };
 }
 #endif // TEENSYLIGHTCONNECTOR_H

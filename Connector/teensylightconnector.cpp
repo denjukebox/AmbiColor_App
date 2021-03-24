@@ -1,8 +1,8 @@
 #include "teensylightconnector.h"
 
-AC::TeensyLightConnector::TeensyLightConnector()
+AC::TeensyLightConnector::TeensyLightConnector(ResultManager *resultManager)
 {
-
+    _resultManager = resultManager;
 }
 
 AC::TeensyLightConnector::~TeensyLightConnector(){
@@ -16,7 +16,7 @@ bool AC::TeensyLightConnector::StartBroadcast(){
     Logger::WriteActivity(typeid(this), "Started");
 
     _threadActive = true;
-    _processThread = thread(Thread, _portHandle, _manager, _settings, &_threadActive);
+    _processThread = thread(Thread, _portHandle, _resultManager, _settings, &_threadActive);
 
     return true;
 }
@@ -156,12 +156,12 @@ unsigned long AC::TeensyLightConnector::PushOnBuffer(unsigned char *buffer, unsi
     return bufferOffset;
 }
 
-void AC::TeensyLightConnector::Thread(int portHandle, BufferManager* manager, Settings* settings, bool *threadActive)
+void AC::TeensyLightConnector::Thread(int portHandle, ResultManager *resultManager, Settings* settings, bool *threadActive)
 {
     auto size = settings->GetBufferSize() + 1;
     while(*threadActive && portHandle != 0)
     {
-        auto wrapper = manager->GetFreeResult();
+        auto wrapper = resultManager->GetFree();
         if(wrapper != nullptr){
             Statistics::Instance().NextQueued(Statistics::StatisticType::Teensy);
             unsigned char colorBuffer[size];
@@ -169,6 +169,7 @@ void AC::TeensyLightConnector::Thread(int portHandle, BufferManager* manager, Se
             ProccessResult(wrapper, colorBuffer, settings);
             PushToTeensy(portHandle, colorBuffer, size);
             Statistics::Instance().NextConsumed(Statistics::StatisticType::Teensy);
+            resultManager->Clean(wrapper);
         }
     }
 }
@@ -239,59 +240,3 @@ bool AC::TeensyLightConnector::PushToTeensy(int _portHandle, unsigned char* buff
         return false;
     }
 }
-
-//void AC::TeensyLightConnector::SendBuffer(int _portHandle, queue<vector<unsigned char>> *sendQueue, mutex* sendMutex, bool *threadActive)
-//{
-//    while(*threadActive && _portHandle != 0)
-//    {
-//        if(!sendQueue->empty())
-//        {
-//            sendMutex->lock();
-//            Statistics::Instance().NextConsumed(Statistics::StatisticType::Teensy);
-//            PushToTeensy(_portHandle, sendQueue->front().begin(), sendQueue->front().end());
-//            sendQueue->pop();
-//            sendMutex->unlock();
-//        }
-//    }
-//}
-
-//bool AC::TeensyLightConnector::PushOnSendQueue(char command){
-//    auto buffer = vector<unsigned char>(GetBufferSize());
-//    buffer[0] = command;
-//    PushOnSendQueue(buffer);
-//    return true;
-//}
-
-//bool AC::TeensyLightConnector::PushOnSendQueue(char command, vector<unsigned char>::iterator start, vector<unsigned char>::iterator end)
-//{
-//    auto buffer = vector<unsigned char>(GetBufferSize());
-//    copy(start, end, buffer.begin() + sizeof (unsigned char));
-//    buffer[0] = command;
-//    return PushOnSendQueue(buffer);
-//}
-
-//bool AC::TeensyLightConnector::PushOnSendQueue(const vector<unsigned char> buffer)
-//{
-//    try
-//    {
-//         _sendQueueMutex.lock();
-//        while(QUEUE_SIZE_MAX <= _sendQueue.size())
-//        {
-//            Logger::WriteLine(typeid(this), "SendBuffer Overflow");
-//            sleep(1); //Sleep this thread a second so controller has time to clear last buffer
-//        }
-
-//        _sendQueue.push(buffer);
-//        _sendQueueMutex.unlock();
-//        return true;
-//    }
-//    catch (const exception& ex) {
-//        _sendQueueMutex.unlock();
-//        Logger::WriteLine(typeid(this), ex.what());
-//        return false;
-//    }
-//}
-
-//int AC::TeensyLightConnector::GetBufferSize(){
-//    return _settings->GetBufferSize();//_deviceConfigured ? _settings->GetBufferSize() : INITAL_BUFFER_SIZE;
-//}

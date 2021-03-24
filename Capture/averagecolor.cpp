@@ -16,6 +16,5 @@ void AC::AverageColor::AddToAverage(vector<Screen_Capture::ImageBGRA>::iterator 
 
 QColor AC::AverageColor::GetQColor()
 {
-    //TODO POST PROCESSING
     return QColor(_r / _sampleSize, _g / _sampleSize, _b / _sampleSize);
 }

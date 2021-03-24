@@ -1,9 +1,11 @@
 #include "previewdialog.h"
 #include "ui_previewdialog.h"
 
-PreviewDialog::PreviewDialog(QWidget *parent) :
+PreviewDialog::PreviewDialog(FrameManager *frameManager, ResultManager *resultManager, QWidget *parent) :
     QDialog(parent),
-    _ui(new Ui::PreviewDialog)
+    _ui(new Ui::PreviewDialog),
+    _grid(resultManager, this),
+    _divisionThreader(frameManager, resultManager)
 {
     _ui->setupUi(this);
 }
@@ -21,7 +23,7 @@ void PreviewDialog::Start(){
         return;
 
     _divisionThreader.Start();
-    _grid->Start();
+    _grid.Start();
     _isRunning = true;
 }
 
@@ -29,7 +31,7 @@ void PreviewDialog::Stop(){
     if(!_isRunning)
         return;
 
-    _grid->Stop();
+    _grid.Stop();
     _divisionThreader.Stop();
     _isRunning = false;
 }

@@ -16,14 +16,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    Capture/buffermanager.cpp \
     Capture/averagecolor.cpp \
+    Capture/buffers.cpp \
     Capture/divisionthreader.cpp \
     Capture/framedivider.cpp \
     Capture/framegrabber.cpp \
     Capture/framewrapper.cpp \
     Capture/resultwrapper.cpp \
-    Capture/teensythreader.cpp \
     Connector/teensylightconnector.cpp \
     Controls/gridcolorrenderer.cpp \
     Controls/simplerectangle.cpp \
@@ -37,15 +36,14 @@ SOURCES += \
     main.cpp
 
 HEADERS += \
-    Capture/buffermanager.h \
     Capture/averagecolor.h \
+    Capture/buffers.h \
     Capture/divisionthreader.h \
     Capture/enums.h \
     Capture/framedivider.h \
     Capture/framegrabber.h \
     Capture/framewrapper.h \
     Capture/resultwrapper.h \
-    Capture/teensythreader.h \
     Connector/teensylightconnector.h \
     Controls/gridcolorrenderer.h \
     Controls/simplerectangle.h \

@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 #include "Connector/teensylightconnector.h"
-
-#include "Capture/teensythreader.h"
 #include "Capture/framegrabber.h"
 
 #include "Util/settings.h"
@@ -62,13 +60,17 @@ private:
 
     Settings* _settings = &Settings::Instance();
 
-    PreviewDialog *_previewDialog = new PreviewDialog(this);
+    ResultManager *_resultManager = new ResultManager();
+    FrameManager *_frameManager = new FrameManager();
+
+    PreviewDialog *_previewDialog = new PreviewDialog(_frameManager, _resultManager, this);
     SettingsDialog *_settingsDialog = new SettingsDialog(this);
     StatisticsDialog *_statisticsDialog = new StatisticsDialog(this);
 
-    FrameGrabber _framegrabber = FrameGrabber();
-    DivisionThreader _divisionThreader = DivisionThreader();
-    TeensyLightConnector *_connector = new TeensyLightConnector();
+    FrameGrabber _framegrabber = FrameGrabber(_frameManager);
+    DivisionThreader _divisionThreader = DivisionThreader(_frameManager, _resultManager);
+    TeensyLightConnector *_connector = new TeensyLightConnector(_resultManager);
+
 
     QAction *restoreAction;
 

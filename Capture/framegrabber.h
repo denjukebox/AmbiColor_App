@@ -3,7 +3,7 @@
 
 #include "ScreenCapture.h"
 #include "framedivider.h"
-#include "buffermanager.h"
+#include "buffers.h"
 #include "Util/statistics.h"
 #include "Util/settings.h"
 #include "Util/logger.h"
@@ -27,7 +27,7 @@ namespace AC {
     {
 
     public:
-        FrameGrabber();
+        FrameGrabber(FrameManager *frameManager);
         ~FrameGrabber();
 
         void StartCapture();
@@ -37,11 +37,11 @@ namespace AC {
         void SetMonitor(Screen_Capture::Monitor monitor);
 
     private:
-        BufferManager *_manager = &BufferManager::Instance();
+        FrameManager *_frameManager;
         Settings *_settings = &Settings::Instance();
 
         shared_ptr<Screen_Capture::IScreenCaptureManager> _grabber;
-        static void ProcessCapturedFrame(BufferManager *manager, const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor);
+        static void ProcessCapturedFrame(FrameManager *frameManager, const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor);
 
         Screen_Capture::Monitor _monitor = Screen_Capture::Monitor();
 

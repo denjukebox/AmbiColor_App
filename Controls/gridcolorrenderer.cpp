@@ -1,6 +1,8 @@
 #include "gridcolorrenderer.h"
 
-AC::GridColorRenderer::GridColorRenderer(QWidget *parent) : QGridLayout(parent)
+AC::GridColorRenderer::GridColorRenderer(ResultManager *resultManager, QWidget *parent) :
+    QGridLayout(parent),
+    _resultManager(resultManager)
 {
     this->setSpacing(0);
     this->setMargin(0);
@@ -13,7 +15,7 @@ void AC::GridColorRenderer::Start(){
         return;
 
     _threadActive = true;
-    _processThread = std::thread(SetColors, this, _manager, _settings, &_threadActive);
+    _processThread = std::thread(SetColors, this, _resultManager, _settings, &_threadActive);
 }
 
 void AC::GridColorRenderer::Stop(){
@@ -24,19 +26,19 @@ void AC::GridColorRenderer::Stop(){
     _processThread.join();
 }
 
-void AC::GridColorRenderer::SetColors(GridColorRenderer *self, BufferManager *manager, Settings *settings, bool *threadActive)
+void AC::GridColorRenderer::SetColors(GridColorRenderer *self, ResultManager *resultManager, Settings *settings, bool *threadActive)
 {
     ResultWrapper* wrapper;
     while (*threadActive)
     {
-        wrapper = manager->GetFreeResult();
+        wrapper = resultManager->GetFree();
         if(wrapper != nullptr){
             Statistics::Instance().NextConsumed(Statistics::StatisticType::Result);
             PushColorsToGrid(wrapper->GetTopBegin(), self->_top);
             PushColorsToGrid(wrapper->GetBottomBegin(), self->_bottom);
             PushColorsToGrid(wrapper->GetLeftBegin(), self->_left);
             PushColorsToGrid(wrapper->GetRightBegin(), self->_right);
-            manager->CleanResult(wrapper);
+            resultManager->Clean(wrapper);
             emit self->WorkDone();
         }
         this_thread::sleep_for(settings->GetPreviewRate());
