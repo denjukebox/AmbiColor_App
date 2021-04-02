@@ -37,6 +37,36 @@ void AC::Settings::SetDepth(int depth)
     _depth = depth;
 }
 
+int AC::Settings::GetTimeSmoothing()
+{
+    return _timeSmoothing;
+}
+
+void AC::Settings::SetTimeSmoothing(int timeSmoothing)
+{
+    _timeSmoothing = timeSmoothing;
+}
+
+bool AC::Settings::GetIsRecursiveSmoothing()
+{
+    return _isRecurisveSmoothing;
+}
+
+void AC::Settings::SetIsRecursiveSmoothing(bool isRecursiveSmoothing)
+{
+    _isRecurisveSmoothing = isRecursiveSmoothing;
+}
+
+bool AC::Settings::GetIsDividedAsync()
+{
+    return _isDividedAsync;
+}
+
+void AC::Settings::SetIsDividedAsync(bool isDividedAsync)
+{
+    _isDividedAsync = isDividedAsync;
+}
+
 double AC::Settings::GetContentRatio()
 {
     return _ratio;
@@ -129,16 +159,6 @@ vector<Direction> AC::Settings::GetOrder(){
 void AC::Settings::SetOrder(vector<Direction> order)
 {
     _order = order;
-}
-
-chrono::milliseconds AC::Settings::GetBroadcastRate()
-{
-    return _broadcastRate;
-}
-
-void AC::Settings::SetBroadcastRate(chrono::milliseconds rate)
-{
-    _broadcastRate = rate;
 }
 
 //Preview

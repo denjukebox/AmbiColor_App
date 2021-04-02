@@ -17,7 +17,6 @@ bool AC::FrameManager::Queue(const SL::Screen_Capture::Image &img){
     }
 }
 
-
 AC::ResultManager::ResultManager(){
     _logType = Statistics::StatisticType::Result;
 }

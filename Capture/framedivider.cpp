@@ -41,7 +41,7 @@ vector<QColor> AC::FrameDivider::CalculateVerticalRow(vector<Screen_Capture::Ima
 
 QColor AC::FrameDivider::CalculateHorizontalPixel(vector<Screen_Capture::ImageBGRA>::iterator imgRef, unsigned int rowOffset, unsigned int blockPos, unsigned int imageWidth, unsigned int depth, unsigned int pixelPerblockWidth)
 {
-    AverageColor color;
+    auto color = FrameAverageColor();
     vector<Screen_Capture::ImageBGRA> relevantColors;
 
     auto blockOffset = blockPos * pixelPerblockWidth;
@@ -52,29 +52,30 @@ QColor AC::FrameDivider::CalculateHorizontalPixel(vector<Screen_Capture::ImageBG
                             ((rowOffset + depthPos) * imageWidth) + //Row offset
                             (pixelPerblockWidth * blockPos);
         relevantColors = vector<Screen_Capture::ImageBGRA>(blockStart, blockStart + pixelPerblockWidth);
-        color.AddToAverage(relevantColors.begin(), relevantColors.size());
+        color.AddStackToAverage(&relevantColors);
     }
 
-    return color.GetQColor();
+    return color.GetAverage();
 }
 
 QColor AC::FrameDivider::CalculateVerticalPixel(vector<Screen_Capture::ImageBGRA>::iterator imgRef, unsigned int columnOffset, unsigned int blockPos, unsigned int imageWidth, unsigned int imageHeight, unsigned int depth, unsigned int pixelPerblockHeight)
 {
-    AverageColor color;
+    auto color = FrameAverageColor();
     vector<Screen_Capture::ImageBGRA> relevantColors;
 
     auto blockOffset = blockPos * pixelPerblockHeight;
     if(imageHeight < blockOffset + pixelPerblockHeight)
         pixelPerblockHeight = imageHeight - blockOffset;
+
     for (unsigned int rowPos = 0; rowPos < pixelPerblockHeight; rowPos++) {
         auto blockStart = imgRef + //Start of image
                             (blockOffset + rowPos) * imageWidth + //Row offset
                             columnOffset;
         relevantColors = vector<Screen_Capture::ImageBGRA>(blockStart, blockStart + depth);
-        color.AddToAverage(relevantColors.begin(), relevantColors.size());
+        color.AddStackToAverage(&relevantColors);
     }
 
-    return color.GetQColor();
+    return color.GetAverage();
 }
 
 unsigned int AC::FrameDivider::CalculateVerticalOffset(unsigned int imageWidth, unsigned int imageHeight, double contentRatio){

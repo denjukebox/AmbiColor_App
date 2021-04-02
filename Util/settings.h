@@ -22,6 +22,9 @@ namespace AC {
         void SetWidth(int width);
         void SetHeight(int height);
         void SetDepth(int depth);
+        void SetTimeSmoothing(int timeSmoothing);
+        void SetIsRecursiveSmoothing(bool isRecursiveSmoothing);
+        void SetIsDividedAsync(bool isDividedAsync);
         void SetContentRatio(double ratio);
         void SetCaptureRate(chrono::milliseconds rate);
         void SetColorOrder(ColorOrder order);
@@ -32,7 +35,6 @@ namespace AC {
         void SetNumberOfStrips(int numberOfStrips);
         void SetBufferSize(int bufferSize);
         void SetOrder(vector<Direction> order);
-        void SetBroadcastRate(chrono::milliseconds rate);
 
         //Preview
         void SetPreviewRate(chrono::milliseconds rate);
@@ -42,6 +44,9 @@ namespace AC {
         int GetWidth();
         int GetHeight();
         int GetDepth();
+        int GetTimeSmoothing();
+        bool GetIsRecursiveSmoothing();
+        bool GetIsDividedAsync();
         double GetContentRatio();
         chrono::milliseconds GetCaptureRate();
 
@@ -51,7 +56,6 @@ namespace AC {
         int GetBufferSize();
         int GetAmoutPixels();
         vector<Direction> GetOrder();
-        chrono::milliseconds GetBroadcastRate();
         ColorOrder GetColorOrder();
 
         LEDColorCorrection GetColorCorrection();
@@ -68,6 +72,10 @@ namespace AC {
         int _width = STARTUP_WIDTH;
         int _height = STARTUP_HEIGHT;
         int _depth = STARTUP_DEPTH;
+        int _timeSmoothing = STARTUP_TIME_SMOOTHING;
+        bool _isRecurisveSmoothing = STARTUP_IS_RECURISVE_SMOOTHING;
+        bool _isDividedAsync = STARTUP_IS_DIVIDED_ASYNC;
+
         double _ratio = STARTUP_RATIO;
         ColorOrder _colorOrder = STARTUP_COLOR_ORDER;
         LEDColorCorrection _correction = STARTUP_COLOR_CORRECTION;
@@ -77,7 +85,6 @@ namespace AC {
         int _brightness = CONTROLLER_BRIGHTNESS;
         int _numberOfStrips = CONTROLLER_STRIP_COUNT;
         vector<Direction> _order = CONTROLLER_ORDER;
-        chrono::milliseconds _broadcastRate = chrono::milliseconds(1000 / CONTROLLER_FPS);
 
         //Preview
         chrono::milliseconds _previewRate = chrono::milliseconds(1000 / PREVIEW_FPS);

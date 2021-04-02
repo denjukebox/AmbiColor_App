@@ -30,7 +30,8 @@ namespace AC {
     private:
         static void Thread(FrameDivider *divider, FrameManager *frameManager, ResultManager *resultManager, ResultManager *timeManager, Settings *settings, bool *threadActive);
         static void DivideFrame(FrameDivider *divider, FrameWrapper *frame, ResultManager *resultManager, ResultManager *timeManager, Settings *settings);
-        static void AverageColors(vector<QColor> *result1, vector<QColor>::iterator result2, unsigned long size);
+        static void CalculateTimeSmoothing(vector<WheightedAverageColor> *average, unsigned long int depth, vector<QColor>::iterator result, unsigned long size);
+        static void ApplyTimeSmoothing(vector<WheightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size);
 
         static vector<QColor> CalculateTop(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);
         static vector<QColor> CalculateBottom(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);

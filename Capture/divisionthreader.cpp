@@ -48,43 +48,86 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
         auto height = settings->GetHeight();
         auto depth = settings->GetDepth();
         auto ratio =  settings->GetContentRatio();
+        auto timeSmoothing = settings->GetTimeSmoothing();
 
-        auto asyncTop = async(launch::async, CalculateTop, divider, frame, width, depth, ratio);
-        auto asyncBottom = async(launch::async, CalculateBottom, divider, frame, width, depth, ratio);
-        auto asyncLeft = async(launch::async, CalculateLeft, divider, frame, height, depth, ratio);
-        auto asyncRight = async(launch::async, CalculateRight, divider, frame, height, depth, ratio);
+        vector<QColor> top;
+        vector<QColor> bottom;
+        vector<QColor> left;
+        vector<QColor> right;
+        //auto time = chrono::high_resolution_clock::now();
+        if(settings->GetIsDividedAsync())
+        {
+            auto asyncTop = async(launch::async, CalculateTop, divider, frame, width, depth, ratio);
+            auto asyncBottom = async(launch::async, CalculateBottom, divider, frame, width, depth, ratio);
+            auto asyncLeft = async(launch::async, CalculateLeft, divider, frame, height, depth, ratio);
+            auto asyncRight = async(launch::async, CalculateRight, divider, frame, height, depth, ratio);
 
-        auto top = asyncTop.get();// CalculateTop( divider, frame, width, depth, ratio);
-        auto bottom = asyncBottom.get();// CalculateBottom( divider, frame, width, depth, ratio);
-        auto left = asyncLeft.get();// CalculateLeft( divider, frame, height, depth, ratio);
-        auto right = asyncRight.get();// CalculateRight( divider, frame, height, depth, ratio);
-
-        ResultWrapper* pastframe;
-        for(auto pos = 0; pos < 10; pos++ ){
-            pastframe = timeManager->GetFree();
-            if(pastframe == nullptr){
-                timeManager->Push(timeManager->GetUsed());
-            }
-            else{
-                AverageColors(&top, pastframe->GetTopBegin(), pastframe->GetTopSize());
-                AverageColors(&bottom, pastframe->GetBottomBegin(), pastframe->GetBottomSize());
-                AverageColors(&left, pastframe->GetLeftBegin(), pastframe->GetLeftSize());
-                AverageColors(&right, pastframe->GetRightBegin(), pastframe->GetRightSize());
-                timeManager->Clean(pastframe);
-            }
+            top = asyncTop.get();
+            bottom = asyncBottom.get();
+            left = asyncLeft.get();
+            right = asyncRight.get();
+        }
+        else
+        {
+            top = CalculateTop( divider, frame, width, depth, ratio);
+            bottom = CalculateBottom( divider, frame, width, depth, ratio);
+            left = CalculateLeft( divider, frame, height, depth, ratio);
+            right = CalculateRight( divider, frame, height, depth, ratio);
         }
 
-        timeManager->Queue(top,bottom,left,right);
+        //auto spend = chrono::duration_cast<chrono::milliseconds>(time - chrono::high_resolution_clock::now());
+
+        if(timeSmoothing != 0){
+            // Add raw frame to time stack if not recursive
+            if(!settings->GetIsRecursiveSmoothing())
+                timeManager->Queue(top,bottom,left,right);
+
+            ResultWrapper* pastframe;
+            vector<WheightedAverageColor> topAverage;
+            vector<WheightedAverageColor> bottomAverage;
+            vector<WheightedAverageColor> leftAverage;
+            vector<WheightedAverageColor> rightAverage;
+
+            for(auto pos = 0; pos < timeSmoothing; pos++ ){
+                pastframe = timeManager->GetFree();
+                if(pastframe == nullptr){
+                    timeManager->Queue(top,bottom,left,right);
+                }
+                else{
+                    CalculateTimeSmoothing(&topAverage, timeSmoothing, pastframe->GetTopBegin(), pastframe->GetTopSize());
+                    CalculateTimeSmoothing(&bottomAverage, timeSmoothing, pastframe->GetBottomBegin(), pastframe->GetBottomSize());
+                    CalculateTimeSmoothing(&leftAverage, timeSmoothing, pastframe->GetLeftBegin(), pastframe->GetLeftSize());
+                    CalculateTimeSmoothing(&rightAverage, timeSmoothing, pastframe->GetRightBegin(), pastframe->GetRightSize());
+                    timeManager->Clean(pastframe);
+                }
+            }
+
+            ApplyTimeSmoothing(&topAverage, top.begin(), top.size());
+            ApplyTimeSmoothing(&bottomAverage, bottom.begin(), bottom.size());
+            ApplyTimeSmoothing(&leftAverage, left.begin(), left.size());
+            ApplyTimeSmoothing(&rightAverage, right.begin(), right.size());
+
+            // Add smooth frame to time stack if recursive
+            if(settings->GetIsRecursiveSmoothing())
+                timeManager->Queue(top,bottom,left,right);
+        }
+
         resultManager->Queue(top,bottom,left,right);
 }
 
-void AC::DivisionThreader::AverageColors(vector<QColor> *result1, vector<QColor>::iterator result2, unsigned long size){
-    if(result1->size() != size)
-        return;
-    for(unsigned long pos = 0; pos < result1->size(); pos++){
-        result1->at(pos).setRed((result1->at(pos).red() + result2[pos].red()) / 2);
-        result1->at(pos).setGreen((result1->at(pos).green() + result2[pos].green()) / 2);
-        result1->at(pos).setBlue((result1->at(pos).blue() + result2[pos].blue()) / 2);
+void  AC::DivisionThreader::CalculateTimeSmoothing(vector<WheightedAverageColor> *average, unsigned long int depth, vector<QColor>::iterator result, unsigned long size)
+{
+    for(unsigned long pos = 0; pos < size; pos++){
+        if(average->size() != size){
+            average->push_back(WheightedAverageColor(depth));
+        }
+        average->at(pos).AddToAverage(&result[pos]);
+    }
+}
+
+void AC::DivisionThreader::ApplyTimeSmoothing(vector<WheightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size){
+    for(unsigned long pos = 0; pos < size; pos++){
+        result[pos] = average->at(pos).GetAverage();
     }
 }
 

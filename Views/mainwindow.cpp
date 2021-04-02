@@ -67,10 +67,10 @@ void MainWindow::ShowTrayMessage(QString title, QString message, QSystemTrayIcon
 
 void MainWindow::ShowSettings()
 {
+    _framegrabber.StopCapture();
     auto result = _settingsDialog->exec();
     if(result == 1)
     {
-        _framegrabber.StopCapture();
         _framegrabber.StartCapture();
     }
 }

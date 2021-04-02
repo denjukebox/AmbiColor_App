@@ -12,9 +12,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     _ui->widthEdit->setText(QString::number(_settings->GetWidth()));
     _ui->heightEdit->setText(QString::number(_settings->GetHeight()));
     _ui->depthEdit->setText(QString::number(_settings->GetDepth()));
+    _ui->timeSmoothingEdit->setText(QString::number(_settings->GetTimeSmoothing()));
     _ui->brightnessEdit->setText(QString::number(_settings->GetBrightness()));
+    _ui->recursiveSmoothingCheck->setChecked(_settings->GetIsRecursiveSmoothing());
+    _ui->asyncThreadsCheck->setChecked(_settings->GetIsDividedAsync());
     _ui->captureEdit->setText(QString::number(1000 / _settings->GetCaptureRate().count()));
-    _ui->teensyEdit->setText(QString::number(1000 / _settings->GetBroadcastRate().count()));
     _ui->ratioCombo->addItems(ratios);
 
     connect(_ui->buttonBox, &QDialogButtonBox::clicked, this, &SettingsDialog::SaveSettings);
@@ -26,9 +28,11 @@ void SettingsDialog::SaveSettings(QAbstractButton *button)
         _settings->SetWidth(_ui->widthEdit->text().toInt());
         _settings->SetHeight(_ui->heightEdit->text().toInt());
         _settings->SetDepth(_ui->depthEdit->text().toInt());
+        _settings->SetTimeSmoothing(_ui->timeSmoothingEdit->text().toInt());
         _settings->SetBrightness(_ui->brightnessEdit->text().toInt());
+        _settings->SetIsRecursiveSmoothing(_ui->recursiveSmoothingCheck->isChecked());
+        _settings->SetIsDividedAsync(_ui->asyncThreadsCheck->isChecked());
         _settings->SetCaptureRate(std::chrono::milliseconds(_ui->captureEdit->text().toInt() * 1000));
-        _settings->SetBroadcastRate(std::chrono::milliseconds(_ui->teensyEdit->text().toInt() * 1000));
         _settings->SetContentRatio(CalculateRatio());
     }
     this->close();
