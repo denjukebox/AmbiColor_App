@@ -1,9 +1,10 @@
 #include "divisionthreader.h"
 
-AC::DivisionThreader::DivisionThreader(FrameManager *frameManager, ResultManager *resultManager)
+AC::DivisionThreader::DivisionThreader(FrameManager *frameManager, ResultManager *resultManager, TimeManager *timeManager)
 {
     _frameManager = frameManager;
     _resultManager = resultManager;
+    _timeManager = timeManager;
 }
 
 void AC::DivisionThreader::Start(){
@@ -28,21 +29,22 @@ bool AC::DivisionThreader::IsRunning(){
     return _threadActive;
 }
 
-void AC::DivisionThreader::Thread(FrameDivider *divider, FrameManager *frameManager, ResultManager *resultManager, ResultManager *timeManager, Settings *settings, bool *threadActive)
+void AC::DivisionThreader::Thread(FrameDivider *divider, FrameManager *frameManager, ResultManager *resultManager, TimeManager *timeManager, Settings *settings, bool *threadActive)
 {
      while(*threadActive){
-         auto frame = frameManager->GetFree();
          auto start = chrono::high_resolution_clock::now();
-         if(frame != nullptr)
-            DivideFrame(divider, frame, resultManager, timeManager, settings);
-         frameManager->Clean(frame);
+         auto frame = frameManager->GetFree();
+         if(frame != nullptr){
+             DivideFrame(divider, frame, resultManager, timeManager, settings);
+             frameManager->Clean(frame);
+         }
          auto duration = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start);
          if(duration < settings->GetCaptureRate())
              this_thread::sleep_for(settings->GetCaptureRate() - duration);
      }
 }
 
-void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *frame, ResultManager *resultManager, ResultManager *timeManager, Settings *settings)
+void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *frame, ResultManager *resultManager, TimeManager *timeManager, Settings *settings)
 {
         auto width = settings->GetWidth();
         auto height = settings->GetHeight();
@@ -54,7 +56,7 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
         vector<QColor> bottom;
         vector<QColor> left;
         vector<QColor> right;
-        //auto time = chrono::high_resolution_clock::now();
+
         if(settings->GetIsDividedAsync())
         {
             auto asyncTop = async(launch::async, CalculateTop, divider, frame, width, depth, ratio);
@@ -75,57 +77,62 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
             right = CalculateRight( divider, frame, height, depth, ratio);
         }
 
-        //auto spend = chrono::duration_cast<chrono::milliseconds>(time - chrono::high_resolution_clock::now());
-
-        if(timeSmoothing != 0){
-            // Add raw frame to time stack if not recursive
-            if(!settings->GetIsRecursiveSmoothing())
-                timeManager->Queue(top,bottom,left,right);
-
-            ResultWrapper* pastframe;
-            vector<WheightedAverageColor> topAverage;
-            vector<WheightedAverageColor> bottomAverage;
-            vector<WheightedAverageColor> leftAverage;
-            vector<WheightedAverageColor> rightAverage;
-
-            for(auto pos = 0; pos < timeSmoothing; pos++ ){
-                pastframe = timeManager->GetFree();
-                if(pastframe == nullptr){
-                    timeManager->Queue(top,bottom,left,right);
-                }
-                else{
-                    CalculateTimeSmoothing(&topAverage, timeSmoothing, pastframe->GetTopBegin(), pastframe->GetTopSize());
-                    CalculateTimeSmoothing(&bottomAverage, timeSmoothing, pastframe->GetBottomBegin(), pastframe->GetBottomSize());
-                    CalculateTimeSmoothing(&leftAverage, timeSmoothing, pastframe->GetLeftBegin(), pastframe->GetLeftSize());
-                    CalculateTimeSmoothing(&rightAverage, timeSmoothing, pastframe->GetRightBegin(), pastframe->GetRightSize());
-                    timeManager->Clean(pastframe);
-                }
-            }
-
-            ApplyTimeSmoothing(&topAverage, top.begin(), top.size());
-            ApplyTimeSmoothing(&bottomAverage, bottom.begin(), bottom.size());
-            ApplyTimeSmoothing(&leftAverage, left.begin(), left.size());
-            ApplyTimeSmoothing(&rightAverage, right.begin(), right.size());
-
-            // Add smooth frame to time stack if recursive
-            if(settings->GetIsRecursiveSmoothing())
-                timeManager->Queue(top,bottom,left,right);
+        // Add smooth frame to time stack if recursive
+        if(settings->GetIsRecursiveSmoothing()){
+            TimeSmoothing(&top, &bottom, &left, &right, timeManager, timeSmoothing);
+            timeManager->Queue(top, bottom, left, right);
+        }
+        else{
+            timeManager->Queue(top, bottom, left, right);
+            TimeSmoothing(&top, &bottom, &left, &right, timeManager, timeSmoothing);
         }
 
         resultManager->Queue(top,bottom,left,right);
 }
 
-void  AC::DivisionThreader::CalculateTimeSmoothing(vector<WheightedAverageColor> *average, unsigned long int depth, vector<QColor>::iterator result, unsigned long size)
+void AC::DivisionThreader::TimeSmoothing(vector<QColor> *top, vector<QColor> *bottom, vector<QColor> *left, vector<QColor> *right, TimeManager *timeManager, int timeSmoothing)
+{
+    ResultWrapper* pastframe;
+    vector<WeightedAverageColor> topAverage;
+    vector<WeightedAverageColor> bottomAverage;
+    vector<WeightedAverageColor> leftAverage;
+    vector<WeightedAverageColor> rightAverage;
+
+    auto freeSize = timeManager->GetFreeSize();
+
+    while((pastframe = timeManager->GetFree()) != nullptr){
+        CalculateTimeSmoothing(&topAverage, pastframe->GetTopBegin(), pastframe->GetTopSize());
+        CalculateTimeSmoothing(&bottomAverage, pastframe->GetBottomBegin(), pastframe->GetBottomSize());
+        CalculateTimeSmoothing(&leftAverage, pastframe->GetLeftBegin(), pastframe->GetLeftSize());
+        CalculateTimeSmoothing(&rightAverage, pastframe->GetRightBegin(), pastframe->GetRightSize());
+        timeManager->Clean(pastframe);
+    }
+
+    timeManager->Rotate(freeSize);
+    if(timeSmoothing == freeSize){
+        timeManager->Clean(timeManager->GetFree());
+    }
+
+    ApplyTimeSmoothing(&topAverage, top->begin(), top->size());
+    ApplyTimeSmoothing(&bottomAverage, bottom->begin(), bottom->size());
+    ApplyTimeSmoothing(&leftAverage, left->begin(), left->size());
+    ApplyTimeSmoothing(&rightAverage, right->begin(), right->size());
+}
+
+void AC::DivisionThreader::CalculateTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size)
 {
     for(unsigned long pos = 0; pos < size; pos++){
         if(average->size() != size){
-            average->push_back(WheightedAverageColor(depth));
+            average->push_back(WeightedAverageColor());
         }
         average->at(pos).AddToAverage(&result[pos]);
     }
 }
 
-void AC::DivisionThreader::ApplyTimeSmoothing(vector<WheightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size){
+void AC::DivisionThreader::ApplyTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size){
+    if(average->size() == 0 || size != average->size())
+        return;
+
     for(unsigned long pos = 0; pos < size; pos++){
         result[pos] = average->at(pos).GetAverage();
     }

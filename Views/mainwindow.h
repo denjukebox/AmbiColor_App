@@ -62,13 +62,14 @@ private:
 
     ResultManager *_resultManager = new ResultManager();
     FrameManager *_frameManager = new FrameManager();
+    TimeManager *_timeManager = new TimeManager(STARTUP_TIME_SMOOTHING);
 
-    PreviewDialog *_previewDialog = new PreviewDialog(_frameManager, _resultManager, this);
+    PreviewDialog *_previewDialog = new PreviewDialog(_resultManager, this);
     SettingsDialog *_settingsDialog = new SettingsDialog(this);
     StatisticsDialog *_statisticsDialog = new StatisticsDialog(this);
 
     FrameGrabber _framegrabber = FrameGrabber(_frameManager);
-    DivisionThreader _divisionThreader = DivisionThreader(_frameManager, _resultManager);
+    DivisionThreader _divisionThreader = DivisionThreader(_frameManager, _resultManager, _timeManager);
     TeensyLightConnector *_connector = new TeensyLightConnector(_resultManager);
 
 

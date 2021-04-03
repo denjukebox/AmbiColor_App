@@ -19,12 +19,6 @@ namespace AC
     {
 
     public:
-        Buffer()
-        {
-            FillBuffers();
-            SyncBufferUse();
-        }
-
         virtual bool Push(WrapperT* wrapper){
             try {
                 lock_guard<mutex> guard(_lock);
@@ -50,6 +44,16 @@ namespace AC
             }
         }
 
+        virtual int GetUsedSize()
+        {
+            return _used.size();
+        }
+
+        virtual bool GetUsedPosition(WrapperT* ref)
+        {
+            return distance(_used.front(), ref);
+        }
+
         virtual WrapperT* GetFree()
         {
             try {
@@ -65,6 +69,16 @@ namespace AC
             }
         }
 
+        virtual int GetFreeSize()
+        {
+            return _free.size();
+        }
+
+        virtual int GetFreePosition(WrapperT* ref)
+        {
+            return distance(_free.front(), ref);
+        }
+
         virtual bool Clean(WrapperT* ref)
         {
             try {
@@ -76,13 +90,8 @@ namespace AC
             }
         }
 
-        virtual int GetPosition(WrapperT* ref)
-        {
-            return distance(&_stack.front(), ref);
-        }
-
     protected:
-        const static int BUFFER_STACK_MAX_COUNT = 10;
+        const static int BUFFER_STACK_MAX_COUNT = 50;
 
         mutex _lock;
         queue<WrapperT*> _free;
@@ -90,16 +99,16 @@ namespace AC
         array<WrapperT, BUFFER_STACK_MAX_COUNT> _stack;
         Statistics::StatisticType _logType;
 
-        void SyncBufferUse(){
+        void SyncBufferUse(int usedSize = BUFFER_STACK_MAX_COUNT){
             lock_guard<mutex> guard(_lock);
-            for(auto pos = 0; pos < BUFFER_STACK_MAX_COUNT; pos++){
+            for(auto pos = 0; pos < usedSize; pos++){
                 _used.push(&_stack[pos]);
             }
         }
 
-        void FillBuffers(){
+        void FillBuffers(int stackSize = BUFFER_STACK_MAX_COUNT){
             lock_guard<mutex> guard(_lock);
-            for(auto pos = 0; pos < BUFFER_STACK_MAX_COUNT; pos++){
+            for(auto pos = 0; pos < stackSize; pos++){
                 _stack[pos] = WrapperT();
             }
         }
@@ -109,19 +118,55 @@ namespace AC
     {
 
     public:
-        FrameManager();
-        bool Queue(const Screen_Capture::Image &img);
+        FrameManager()
+        {
+            FillBuffers();
+            SyncBufferUse();
+        }
+
+        bool Queue(const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor);
+
+    protected:
+        Statistics::StatisticType _logType = Statistics::StatisticType::Frame;
     };
 
     class ResultManager : public Buffer<ResultWrapper>
     {
 
     public:
-        ResultManager();
+        ResultManager()
+        {
+            FillBuffers();
+            SyncBufferUse();
+        }
+
+        bool Queue(vector<QColor> topColors,
+                        vector<QColor> bottomColors,
+                        vector<QColor> leftColors,
+                        vector<QColor> rightColors);        
+    protected:
+        Statistics::StatisticType _logType = Statistics::StatisticType::Result;
+    };
+
+    class TimeManager : public Buffer<ResultWrapper>
+    {
+
+    public:
+        TimeManager(unsigned long depth){
+            _depth = depth;
+            FillBuffers(depth);
+            SyncBufferUse(depth);
+        }
+
+        void Rotate(unsigned long distance);
+
         bool Queue(vector<QColor> topColors,
                         vector<QColor> bottomColors,
                         vector<QColor> leftColors,
                         vector<QColor> rightColors);
+    protected:
+        Statistics::StatisticType _logType = Statistics::StatisticType::Time;
+        unsigned long _depth;
     };
 }
 

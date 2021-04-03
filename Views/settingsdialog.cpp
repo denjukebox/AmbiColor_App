@@ -48,7 +48,7 @@ double SettingsDialog::CalculateRatio()
         return vertical / horizontal;
     }
 
-    return 0.0;
+    return STARTUP_RATIO;
 }
 
 SettingsDialog::~SettingsDialog()

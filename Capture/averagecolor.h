@@ -23,20 +23,18 @@ namespace AC {
 
         void AddStackToAverage(vector<InputT>* stack){
             _size += stack->size();
-            for(long pos = 0; pos < stack->size(); pos++)
+            for(unsigned long pos = 0; pos < stack->size(); pos++)
             {
                 AddToAverage(&stack->at(pos));
             }
         }
 
-        virtual void AddToAverage(InputT *value)
-        {
+        virtual void AddToAverage(InputT *value){
 
         }
 
-        virtual QColor GetAverage()
-        {
-
+        virtual QColor GetAverage(){
+            return  QColor();
         }
 
         protected:
@@ -57,18 +55,17 @@ namespace AC {
     };
 
 
-    class WheightedAverageColor : public AverageColor<QColor>
+    class WeightedAverageColor : public AverageColor<QColor>
     {
 
     public:
-        WheightedAverageColor(unsigned long int expectedSize);
+        WeightedAverageColor();
 
         void AddToAverage(QColor *value);
         QColor GetAverage();
 
     private:
-        unsigned long int _expectedSize;
-        unsigned long long int _weight;
+        unsigned long long int _weight = 0;
     };
 }
 

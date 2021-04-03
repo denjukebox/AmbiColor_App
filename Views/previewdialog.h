@@ -17,7 +17,7 @@ class PreviewDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit PreviewDialog(FrameManager *frameManager, ResultManager *resultManager, QWidget *parent = nullptr);
+    explicit PreviewDialog(ResultManager *resultManager, QWidget *parent = nullptr);
     ~PreviewDialog();
 
 protected:
@@ -31,7 +31,6 @@ private:
     Settings *_settings = &Settings::Instance();
     Ui::PreviewDialog *_ui;
     GridColorRenderer _grid;// = new GridColorRenderer(this, _resultManager);
-    DivisionThreader _divisionThreader;
 
     bool _isRunning = false;
 };

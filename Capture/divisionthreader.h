@@ -21,17 +21,19 @@ namespace AC {
     {
 
     public:
-        DivisionThreader(FrameManager *frameManager, ResultManager *resultManager);
+        DivisionThreader(FrameManager *frameManager, ResultManager *resultManager, TimeManager *timeManager);
 
         void Stop();
         void Start();
         bool IsRunning();
 
     private:
-        static void Thread(FrameDivider *divider, FrameManager *frameManager, ResultManager *resultManager, ResultManager *timeManager, Settings *settings, bool *threadActive);
-        static void DivideFrame(FrameDivider *divider, FrameWrapper *frame, ResultManager *resultManager, ResultManager *timeManager, Settings *settings);
-        static void CalculateTimeSmoothing(vector<WheightedAverageColor> *average, unsigned long int depth, vector<QColor>::iterator result, unsigned long size);
-        static void ApplyTimeSmoothing(vector<WheightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size);
+        static void Thread(FrameDivider *divider, FrameManager *frameManager, ResultManager *resultManager, TimeManager *timeManager, Settings *settings, bool *threadActive);
+        static void DivideFrame(FrameDivider *divider, FrameWrapper *frame, ResultManager *resultManager, TimeManager *timeManager, Settings *settings);
+
+        static void TimeSmoothing(vector<QColor> *top, vector<QColor> *bottom, vector<QColor> *left, vector<QColor> *right, TimeManager *timeManager, int timeSmoothing);
+        static void CalculateTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size);
+        static void ApplyTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size);
 
         static vector<QColor> CalculateTop(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);
         static vector<QColor> CalculateBottom(FrameDivider *divider, FrameWrapper *frame, unsigned int blocksWidth, unsigned int depth, double contentRatio);
@@ -43,7 +45,7 @@ namespace AC {
 
         FrameManager *_frameManager;
         ResultManager *_resultManager;        
-        ResultManager *_timeManager = new ResultManager();
+        TimeManager *_timeManager;
 
         Settings *_settings = &Settings::Instance();
         FrameDivider _divider = FrameDivider();

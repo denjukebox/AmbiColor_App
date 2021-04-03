@@ -18,7 +18,7 @@ namespace AC {
 
         static Statistics &Instance() {static Statistics buffer; return buffer;}
 
-        enum class StatisticType { Frame, Result, Teensy };
+        enum class StatisticType { Frame, Result, Time, Teensy };
 
         void NextQueued(StatisticType type);
         void NextConsumed(StatisticType type);

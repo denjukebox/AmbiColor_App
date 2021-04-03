@@ -37,6 +37,7 @@ namespace AC {
         void SetMonitor(Screen_Capture::Monitor monitor);
 
     private:
+        void LogMonitor(Screen_Capture::Monitor monitor);
         FrameManager *_frameManager;
         Settings *_settings = &Settings::Instance();
 

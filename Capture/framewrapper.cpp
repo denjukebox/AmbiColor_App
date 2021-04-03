@@ -4,7 +4,8 @@ AC::FrameWrapper::FrameWrapper()
 {
 }
 
-void AC::FrameWrapper::CopyImageToBuffer(const Screen_Capture::Image &img){
+void AC::FrameWrapper::CopyImageToBuffer(const Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
+    _monitor = monitor;
     _frameWidth = Screen_Capture::Width(img);
     _frameHeight = Screen_Capture::Height(img);
     _frameBuffer = vector<Screen_Capture::ImageBGRA>(StartSrc(img),  StartSrc(img) + (Width(img) * Height(img)));
@@ -23,5 +24,10 @@ unsigned int AC::FrameWrapper::GetFrameWidth()
 unsigned int AC::FrameWrapper::GetFrameHeight()
 {
     return _frameHeight;
+}
+
+
+Screen_Capture::Monitor AC::FrameWrapper::GetMonitor(){
+    return _monitor;
 }
 

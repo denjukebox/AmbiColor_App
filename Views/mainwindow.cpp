@@ -81,6 +81,7 @@ void MainWindow::ShowStatistics()
 }
 
 void MainWindow::ShowPreview(){
+    _divisionThreader.Start();
     _previewDialog->show();
 }
 
