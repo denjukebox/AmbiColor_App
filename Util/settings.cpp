@@ -47,16 +47,6 @@ void AC::Settings::SetTimeSmoothing(int timeSmoothing)
     _timeSmoothing = timeSmoothing;
 }
 
-bool AC::Settings::GetIsRecursiveSmoothing()
-{
-    return _isRecurisveSmoothing;
-}
-
-void AC::Settings::SetIsRecursiveSmoothing(bool isRecursiveSmoothing)
-{
-    _isRecurisveSmoothing = isRecursiveSmoothing;
-}
-
 bool AC::Settings::GetIsDividedAsync()
 {
     return _isDividedAsync;

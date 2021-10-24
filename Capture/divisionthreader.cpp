@@ -50,7 +50,7 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
         auto height = settings->GetHeight();
         auto depth = settings->GetDepth();
         auto ratio =  settings->GetContentRatio();
-        auto timeSmoothing = settings->GetTimeSmoothing();
+        auto smoothing =  settings->GetTimeSmoothing();
 
         vector<QColor> top;
         vector<QColor> bottom;
@@ -71,26 +71,22 @@ void AC::DivisionThreader::DivideFrame(FrameDivider *divider, FrameWrapper *fram
         }
         else
         {
-            top = CalculateTop( divider, frame, width, depth, ratio);
-            bottom = CalculateBottom( divider, frame, width, depth, ratio);
-            left = CalculateLeft( divider, frame, height, depth, ratio);
-            right = CalculateRight( divider, frame, height, depth, ratio);
+            top = CalculateTop(divider, frame, width, depth, ratio);
+            bottom = CalculateBottom(divider, frame, width, depth, ratio);
+            left = CalculateLeft(divider, frame, height, depth, ratio);
+            right = CalculateRight(divider, frame, height, depth, ratio);
         }
 
-        // Add smooth frame to time stack if recursive
-        if(settings->GetIsRecursiveSmoothing()){
-            TimeSmoothing(&top, &bottom, &left, &right, timeManager, timeSmoothing);
-            timeManager->Queue(top, bottom, left, right);
+        if(timeManager->GetUsedSize() == 0){
+                timeManager->Clean(timeManager->GetFree());
         }
-        else{
-            timeManager->Queue(top, bottom, left, right);
-            TimeSmoothing(&top, &bottom, &left, &right, timeManager, timeSmoothing);
-        }
+        timeManager->Queue(&top, &bottom, &left, &right);
+        TimeSmoothing(&top, &bottom, &left, &right, timeManager, smoothing);
 
-        resultManager->Queue(top,bottom,left,right);
+        resultManager->Queue(&top, &bottom, &left, &right);
 }
 
-void AC::DivisionThreader::TimeSmoothing(vector<QColor> *top, vector<QColor> *bottom, vector<QColor> *left, vector<QColor> *right, TimeManager *timeManager, int timeSmoothing)
+void AC::DivisionThreader::TimeSmoothing(vector<QColor> *top, vector<QColor> *bottom, vector<QColor> *left, vector<QColor> *right, TimeManager *timeManager, unsigned long smoothing)
 {
     ResultWrapper* pastframe;
     vector<WeightedAverageColor> topAverage;
@@ -98,20 +94,15 @@ void AC::DivisionThreader::TimeSmoothing(vector<QColor> *top, vector<QColor> *bo
     vector<WeightedAverageColor> leftAverage;
     vector<WeightedAverageColor> rightAverage;
 
-    auto freeSize = timeManager->GetFreeSize();
-
     while((pastframe = timeManager->GetFree()) != nullptr){
-        CalculateTimeSmoothing(&topAverage, pastframe->GetTopBegin(), pastframe->GetTopSize());
-        CalculateTimeSmoothing(&bottomAverage, pastframe->GetBottomBegin(), pastframe->GetBottomSize());
-        CalculateTimeSmoothing(&leftAverage, pastframe->GetLeftBegin(), pastframe->GetLeftSize());
-        CalculateTimeSmoothing(&rightAverage, pastframe->GetRightBegin(), pastframe->GetRightSize());
+        CalculateTimeSmoothing(&topAverage, pastframe->GetBegin(Direction::Top), pastframe->GetSize(Direction::Top), smoothing);
+        CalculateTimeSmoothing(&bottomAverage, pastframe->GetBegin(Direction::Bottom), pastframe->GetSize(Direction::Bottom), smoothing);
+        CalculateTimeSmoothing(&leftAverage, pastframe->GetBegin(Direction::Left), pastframe->GetSize(Direction::Left), smoothing);
+        CalculateTimeSmoothing(&rightAverage,pastframe->GetBegin(Direction::Right), pastframe->GetSize(Direction::Right), smoothing);
         timeManager->Clean(pastframe);
     }
 
-    timeManager->Rotate(freeSize);
-    if(timeSmoothing == freeSize){
-        timeManager->Clean(timeManager->GetFree());
-    }
+    timeManager->Rotate();
 
     ApplyTimeSmoothing(&topAverage, top->begin(), top->size());
     ApplyTimeSmoothing(&bottomAverage, bottom->begin(), bottom->size());
@@ -119,11 +110,14 @@ void AC::DivisionThreader::TimeSmoothing(vector<QColor> *top, vector<QColor> *bo
     ApplyTimeSmoothing(&rightAverage, right->begin(), right->size());
 }
 
-void AC::DivisionThreader::CalculateTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size)
+void AC::DivisionThreader::CalculateTimeSmoothing(vector<WeightedAverageColor> *average, vector<QColor>::iterator result, unsigned long size, unsigned long smoothing)
 {
+    if(size == 0)
+        return;
+
     for(unsigned long pos = 0; pos < size; pos++){
         if(average->size() != size){
-            average->push_back(WeightedAverageColor());
+            average->push_back(WeightedAverageColor(smoothing));
         }
         average->at(pos).AddToAverage(&result[pos]);
     }

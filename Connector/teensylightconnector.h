@@ -46,10 +46,15 @@ namespace AC {
 
         bool IsConnected();
 
+
+        static const char CONTROL = '*';
+        static const char COMMAND_CONFIG = 'C';
+        static const char COMMAND_FRAME = 'F';
+
     private:
 
         static void Thread(int portHandle, ResultManager *resultManager, Settings *settings, bool *threadActive);
-        static void ProccessResult(ResultWrapper *wrapper, unsigned char *buffer, Settings *settings);
+        static void ProccessResult(ResultWrapper *wrapper, unsigned char *buffer, int offset, Settings *settings);
         static bool PushToTeensy(int _portHandle, unsigned char *buffer, long size);
 
         static unsigned long PushColorsOnBuffer(unsigned char *buffer, unsigned long bufferOffset, vector<QColor>::iterator colors, unsigned long colorsLength, ColorOrder order);
@@ -67,6 +72,7 @@ namespace AC {
         struct termios _teensyHandle;
         int _portHandle;
         bool _deviceConfigured = false;
+
 
 
         thread _processThread;

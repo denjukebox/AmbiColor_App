@@ -34,10 +34,10 @@ void AC::GridColorRenderer::SetColors(GridColorRenderer *self, ResultManager *re
         wrapper = resultManager->GetFree();
         if(wrapper != nullptr){
             Statistics::Instance().NextConsumed(Statistics::StatisticType::Result);
-            PushColorsToGrid(wrapper->GetTopBegin(), self->_top);
-            PushColorsToGrid(wrapper->GetBottomBegin(), self->_bottom);
-            PushColorsToGrid(wrapper->GetLeftBegin(), self->_left);
-            PushColorsToGrid(wrapper->GetRightBegin(), self->_right);
+            PushColorsToGrid(wrapper->GetBegin(Direction::Top), self->_top);
+            PushColorsToGrid(wrapper->GetBegin(Direction::Bottom), self->_bottom);
+            PushColorsToGrid(wrapper->GetBegin(Direction::Left), self->_left);
+            PushColorsToGrid(wrapper->GetBegin(Direction::Right), self->_right);
             resultManager->Clean(wrapper);
             emit self->WorkDone();
         }

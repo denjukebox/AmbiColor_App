@@ -19,22 +19,19 @@ QColor AC::FrameAverageColor::GetAverage()
     return QColor(r, b, g);
 }
 
-AC::WeightedAverageColor::WeightedAverageColor(){
-}
-
 void AC::WeightedAverageColor::AddToAverage(QColor *color)
 {
     _size++;
-    _r += color->red() * _size;
-    _g += color->green() * _size;
-    _b += color->blue() * _size;
-    _weight += _size;
+    auto factor = _expected / _size;
+    _r += color->red() * factor;
+    _g += color->green() * factor;
+    _b += color->blue() * factor;
 }
 
 QColor AC::WeightedAverageColor::GetAverage()
 {
-    int r = _r / _weight;
-    int g = _g / _weight;
-    int b = _b / _weight;
+    int r = _r / _expected;
+    int g = _g / _expected;
+    int b = _b / _expected;
     return QColor(r, b, g);
 }

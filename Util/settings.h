@@ -23,7 +23,6 @@ namespace AC {
         void SetHeight(int height);
         void SetDepth(int depth);
         void SetTimeSmoothing(int timeSmoothing);
-        void SetIsRecursiveSmoothing(bool isRecursiveSmoothing);
         void SetIsDividedAsync(bool isDividedAsync);
         void SetContentRatio(double ratio);
         void SetCaptureRate(chrono::milliseconds rate);
@@ -45,7 +44,6 @@ namespace AC {
         int GetHeight();
         int GetDepth();
         int GetTimeSmoothing();
-        bool GetIsRecursiveSmoothing();
         bool GetIsDividedAsync();
         double GetContentRatio();
         chrono::milliseconds GetCaptureRate();
@@ -73,7 +71,6 @@ namespace AC {
         int _height = STARTUP_HEIGHT;
         int _depth = STARTUP_DEPTH;
         int _timeSmoothing = STARTUP_TIME_SMOOTHING;
-        bool _isRecurisveSmoothing = STARTUP_IS_RECURISVE_SMOOTHING;
         bool _isDividedAsync = STARTUP_IS_DIVIDED_ASYNC;
 
         double _ratio = STARTUP_RATIO;

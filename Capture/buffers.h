@@ -140,10 +140,10 @@ namespace AC
             SyncBufferUse();
         }
 
-        bool Queue(vector<QColor> topColors,
-                        vector<QColor> bottomColors,
-                        vector<QColor> leftColors,
-                        vector<QColor> rightColors);        
+        bool Queue(vector<QColor> *topColors,
+                        vector<QColor> *bottomColors,
+                        vector<QColor> *leftColors,
+                        vector<QColor> *rightColors);
     protected:
         Statistics::StatisticType _logType = Statistics::StatisticType::Result;
     };
@@ -158,12 +158,12 @@ namespace AC
             SyncBufferUse(depth);
         }
 
-        void Rotate(unsigned long distance);
+        void Rotate();
 
-        bool Queue(vector<QColor> topColors,
-                        vector<QColor> bottomColors,
-                        vector<QColor> leftColors,
-                        vector<QColor> rightColors);
+        bool Queue(vector<QColor> *topColors,
+                        vector<QColor> *bottomColors,
+                        vector<QColor> *leftColors,
+                        vector<QColor> *rightColors);
     protected:
         Statistics::StatisticType _logType = Statistics::StatisticType::Time;
         unsigned long _depth;

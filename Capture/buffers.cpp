@@ -2,10 +2,10 @@
 
 bool AC::FrameManager::Queue(const SL::Screen_Capture::Image &img, const Screen_Capture::Monitor &monitor){
     try {
-        auto wrapper = this->Buffer::GetUsed();
+        auto wrapper = GetUsed();
         if(wrapper != nullptr){
             wrapper->CopyImageToBuffer(img, monitor);
-            this->Buffer::Push(wrapper);
+            Push(wrapper);
         }
         return true;
     }  catch (const exception& ex) {
@@ -14,15 +14,15 @@ bool AC::FrameManager::Queue(const SL::Screen_Capture::Image &img, const Screen_
 }
 
 bool AC::ResultManager::Queue(
-        vector<QColor> topColors,
-        vector<QColor> bottomColors,
-        vector<QColor> leftColors,
-        vector<QColor> rightColors){
+        vector<QColor> *topColors,
+        vector<QColor> *bottomColors,
+        vector<QColor> *leftColors,
+        vector<QColor> *rightColors){
     try {
         auto wrapper = GetUsed();
         if(wrapper != nullptr){
-            wrapper->CopyColorsToWrapper(&topColors, &bottomColors, &leftColors, &rightColors);
-            this->Buffer::Push(wrapper);
+            wrapper->CopyColorsToWrapper(topColors, bottomColors, leftColors, rightColors);
+            Push(wrapper);
         }
         return true;
     }  catch (const exception& ex) {
@@ -31,15 +31,15 @@ bool AC::ResultManager::Queue(
 }
 
 bool AC::TimeManager::Queue(
-        vector<QColor> topColors,
-        vector<QColor> bottomColors,
-        vector<QColor> leftColors,
-        vector<QColor> rightColors){
+        vector<QColor> *topColors,
+        vector<QColor> *bottomColors,
+        vector<QColor> *leftColors,
+        vector<QColor> *rightColors){
     try {
         auto wrapper = GetUsed();
         if(wrapper != nullptr){
-            wrapper->CopyColorsToWrapper(&topColors, &bottomColors, &leftColors, &rightColors);
-            this->Buffer::Push(wrapper);
+            wrapper->CopyColorsToWrapper(topColors, bottomColors, leftColors, rightColors);
+            Push(wrapper);
         }
         return true;
     }  catch (const exception& ex) {
@@ -48,15 +48,6 @@ bool AC::TimeManager::Queue(
 }
 
 
-void AC::TimeManager::Rotate(unsigned long distance){
+void AC::TimeManager::Rotate(){
     _free.swap(_used);
-    if(_depth == distance){
-        Clean(GetFree());
-    }
-    else
-    {
-        for(unsigned long pos = 0; pos < distance; pos++){
-            Clean(GetFree());
-        }
-    }
 }

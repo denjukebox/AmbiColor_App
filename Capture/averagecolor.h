@@ -59,13 +59,15 @@ namespace AC {
     {
 
     public:
-        WeightedAverageColor();
+        WeightedAverageColor(unsigned long expected){
+            _expected = expected;
+        }
 
         void AddToAverage(QColor *value);
         QColor GetAverage();
 
     private:
-        unsigned long long int _weight = 0;
+        unsigned long long int _expected = 0;
     };
 }
 

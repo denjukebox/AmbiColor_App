@@ -18,57 +18,25 @@ void AC::ResultWrapper::CopyColorsToWrapper(
 vector<QColor>::iterator AC::ResultWrapper::GetBegin(Direction direction){
     switch (direction) {
         case Direction::Top:
-            return GetTopBegin();
+            return _topColors.begin();
         case Direction::Bottom:
-            return GetBottomBegin();
+            return _bottomColors.begin();
         case Direction::Left:
-            return GetLeftBegin();
+            return _leftColors.begin();
         case Direction::Right:
-            return GetRightBegin();
+            return _rightColors.begin();
     }
 }
 
 unsigned long AC::ResultWrapper::GetSize(Direction direction){
     switch (direction) {
         case Direction::Top:
-            return GetTopSize();
+            return _topColors.size();
         case Direction::Bottom:
-            return GetBottomSize();
+            return _bottomColors.size();
         case Direction::Left:
-            return GetLeftSize();
+            return _leftColors.size();
         case Direction::Right:
-            return GetRightSize();
+            return _rightColors.size();
     }
-}
-
-vector<QColor>::iterator AC::ResultWrapper::GetTopBegin(){
-    return _topColors.begin();
-}
-
-unsigned long AC::ResultWrapper::GetTopSize(){
-    return _topColors.size();
-}
-
-vector<QColor>::iterator AC::ResultWrapper::GetBottomBegin(){
-    return _bottomColors.begin();
-}
-
-unsigned long AC::ResultWrapper::GetBottomSize(){
-    return _bottomColors.size();
-}
-
-vector<QColor>::iterator AC::ResultWrapper::GetLeftBegin(){
-    return _leftColors.begin();
-}
-
-unsigned long AC::ResultWrapper::GetLeftSize(){
-    return _leftColors.size();
-}
-
-vector<QColor>::iterator AC::ResultWrapper::GetRightBegin(){
-    return _rightColors.begin();
-}
-
-unsigned long AC::ResultWrapper::GetRightSize(){
-    return _rightColors.size();
 }

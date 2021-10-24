@@ -99,7 +99,9 @@ bool AC::TeensyLightConnector::ConfigureDevice(){
 
    unsigned char sendbuffer[64];
    unsigned long offset = 0;
-   offset = PushOnBuffer(sendbuffer, offset, 'C');
+   offset = PushOnBuffer(sendbuffer, offset, CONTROL);
+   offset = PushOnBuffer(sendbuffer, offset, COMMAND_CONFIG);
+   offset = PushOnBuffer(sendbuffer, offset, CONTROL);
    offset = PushIntOnBuffer(sendbuffer, offset, _settings->GetWidth());
    offset = PushIntOnBuffer(sendbuffer, offset, _settings->GetHeight());
 
@@ -158,15 +160,18 @@ unsigned long AC::TeensyLightConnector::PushOnBuffer(unsigned char *buffer, unsi
 
 void AC::TeensyLightConnector::Thread(int portHandle, ResultManager *resultManager, Settings* settings, bool *threadActive)
 {
-    auto size = settings->GetBufferSize() + 1;
+    auto size = settings->GetBufferSize() + 3;
     while(*threadActive && portHandle != 0)
     {
         auto wrapper = resultManager->GetFree();
         if(wrapper != nullptr){
             Statistics::Instance().NextQueued(Statistics::StatisticType::Teensy);
             unsigned char colorBuffer[size];
-            *colorBuffer = 'F';
-            ProccessResult(wrapper, colorBuffer, settings);
+            int offset = 0;
+            offset = PushOnBuffer(colorBuffer, offset, CONTROL);
+            offset = PushOnBuffer(colorBuffer, offset, COMMAND_FRAME);
+            offset = PushOnBuffer(colorBuffer, offset, CONTROL);
+            ProccessResult(wrapper, colorBuffer, offset, settings);
             PushToTeensy(portHandle, colorBuffer, size);
             Statistics::Instance().NextConsumed(Statistics::StatisticType::Teensy);
             resultManager->Clean(wrapper);
@@ -174,8 +179,7 @@ void AC::TeensyLightConnector::Thread(int portHandle, ResultManager *resultManag
     }
 }
 
-void AC::TeensyLightConnector::ProccessResult(ResultWrapper* wrapper, unsigned char *buffer, Settings* settings){
-    unsigned long bufferOffset = 1;
+void AC::TeensyLightConnector::ProccessResult(ResultWrapper* wrapper, unsigned char *buffer, int offset, Settings* settings){
     foreach (auto o, settings->GetOrder()) {
         auto colors = wrapper->GetBegin(o);
         auto colorsLength = wrapper->GetSize(o);
@@ -185,7 +189,7 @@ void AC::TeensyLightConnector::ProccessResult(ResultWrapper* wrapper, unsigned c
                         settings->GetColorCorrectionRedFactor(),
                         settings->GetColorCorrectionGreenFactor(),
                         settings->GetColorCorrectionBlueFactor());
-        bufferOffset = PushColorsOnBuffer(buffer, bufferOffset, colors, colorsLength, settings->GetColorOrder());
+        offset = PushColorsOnBuffer(buffer, offset, colors, colorsLength, settings->GetColorOrder());
     }
 }
 

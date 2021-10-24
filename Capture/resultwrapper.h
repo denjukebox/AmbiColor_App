@@ -22,18 +22,6 @@ namespace AC {
         vector<QColor>::iterator GetBegin(Direction direction);
         unsigned long GetSize(Direction direction);
 
-        vector<QColor>::iterator GetTopBegin();
-        unsigned long GetTopSize();
-
-        vector<QColor>::iterator GetBottomBegin();
-        unsigned long GetBottomSize();
-
-        vector<QColor>::iterator GetLeftBegin();
-        unsigned long GetLeftSize();
-
-        vector<QColor>::iterator GetRightBegin();
-        unsigned long GetRightSize();
-
     private:
         vector<QColor> _topColors = vector<QColor>();
         vector<QColor> _bottomColors = vector<QColor>();
