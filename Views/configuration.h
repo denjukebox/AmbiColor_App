@@ -9,7 +9,7 @@ namespace AC {
     const static int STARTUP_HEIGHT = 66;
     const static int STARTUP_DEPTH = 50;
     const static int STARTUP_TIME_SMOOTHING = 10;
-    const static bool STARTUP_IS_DIVIDED_ASYNC = false;
+    const static bool STARTUP_IS_DIVIDED_ASYNC = true;
     const static double STARTUP_RATIO = 1.0;
     const static ColorOrder STARTUP_COLOR_ORDER = ColorOrder::GRB;
     const static LEDColorCorrection STARTUP_COLOR_CORRECTION = LEDColorCorrection::TypicalSMD5050;

@@ -97,20 +97,14 @@ bool AC::TeensyLightConnector::ConfigureDevice(){
     if(!IsConnected())
         return false;
 
-   unsigned char sendbuffer[64];
-   unsigned long offset = 0;
-   offset = PushOnBuffer(sendbuffer, offset, CONTROL);
-   offset = PushOnBuffer(sendbuffer, offset, COMMAND_CONFIG);
-   offset = PushOnBuffer(sendbuffer, offset, CONTROL);
+   unsigned char sendbuffer[CONFIG_FRAME_SERIAL_RX_SIZE];
+   unsigned long offset = PushCommandOnBuffer(sendbuffer, COMMAND_CONFIG);
    offset = PushIntOnBuffer(sendbuffer, offset, _settings->GetWidth());
    offset = PushIntOnBuffer(sendbuffer, offset, _settings->GetHeight());
+   offset = PushIntOnBuffer(sendbuffer, offset, (int)_settings->GetColorOrder());
+   PushIntOnBuffer(sendbuffer, offset, _settings->GetNumberOfStrips());
 
-   for(int orderPos = 0; orderPos < 4; orderPos++){
-       offset = PushOrderOnBuffer(sendbuffer, offset, _settings->GetOrder().at(orderPos));
-   }
-
-   offset = PushIntOnBuffer(sendbuffer, offset, _settings->GetNumberOfStrips());
-   PushToTeensy(_portHandle, sendbuffer, 64);
+   PushToTeensy(_portHandle, sendbuffer, CONFIG_FRAME_SERIAL_RX_SIZE);
    Logger::WriteDebug(typeid(this), "Configured");
    _deviceConfigured = true;
    return true;
@@ -152,6 +146,14 @@ unsigned long AC::TeensyLightConnector::PushIntOnBuffer(unsigned char *buffer, u
     return bufferOffset;
 }
 
+
+unsigned long AC::TeensyLightConnector::PushCommandOnBuffer(unsigned char *buffer, char command){
+    int offset = 0;
+    offset = PushOnBuffer(buffer, offset, CONTROL);
+    offset = PushOnBuffer(buffer, offset, command);
+    return PushOnBuffer(buffer, offset, CONTROL);
+}
+
 unsigned long AC::TeensyLightConnector::PushOnBuffer(unsigned char *buffer, unsigned long bufferOffset, char value){
     *(buffer + bufferOffset) = value;
     bufferOffset++;
@@ -160,17 +162,15 @@ unsigned long AC::TeensyLightConnector::PushOnBuffer(unsigned char *buffer, unsi
 
 void AC::TeensyLightConnector::Thread(int portHandle, ResultManager *resultManager, Settings* settings, bool *threadActive)
 {
-    auto size = settings->GetBufferSize() + 3;
+    auto size = settings->GetBufferSize() + COMMAND_BUFFER_OFFSET;
+    unsigned char colorBuffer[size];
+    PushCommandOnBuffer(colorBuffer, COMMAND_FRAME);
     while(*threadActive && portHandle != 0)
     {
         auto wrapper = resultManager->GetFree();
         if(wrapper != nullptr){
             Statistics::Instance().NextQueued(Statistics::StatisticType::Teensy);
-            unsigned char colorBuffer[size];
-            int offset = 0;
-            offset = PushOnBuffer(colorBuffer, offset, CONTROL);
-            offset = PushOnBuffer(colorBuffer, offset, COMMAND_FRAME);
-            offset = PushOnBuffer(colorBuffer, offset, CONTROL);
+            int offset = COMMAND_BUFFER_OFFSET;
             ProccessResult(wrapper, colorBuffer, offset, settings);
             PushToTeensy(portHandle, colorBuffer, size);
             Statistics::Instance().NextConsumed(Statistics::StatisticType::Teensy);
@@ -203,28 +203,9 @@ void AC::TeensyLightConnector::ApplyCorrection(vector<QColor>::iterator colors, 
 
 unsigned long AC::TeensyLightConnector::PushColorsOnBuffer(unsigned char *buffer, unsigned long bufferOffset, vector<QColor>::iterator colors, unsigned long colorsLength, ColorOrder order){
     for(unsigned long pos = 0; pos < colorsLength; pos++){
-        switch (order) {
-            case ColorOrder::RGB:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
-                break;
-            case ColorOrder::RBG:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
-                break;
-            case ColorOrder::GRB:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
-                break;
-            case ColorOrder::GBR:
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
-                bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
-                break;
-        }
+        bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].red()));
+        bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].green()));
+        bufferOffset = PushOnBuffer(buffer, bufferOffset, char(colors[colorsLength - pos].blue()));
     }
 
     return bufferOffset;

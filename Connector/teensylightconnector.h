@@ -62,6 +62,7 @@ namespace AC {
 
         static unsigned long PushIntOnBuffer(unsigned char *buffer, unsigned long offset, int num);
         static unsigned long PushOrderOnBuffer(unsigned char *buffer, unsigned long offset, Direction dir);
+        static unsigned long PushCommandOnBuffer(unsigned char *buffer, char command);
         static unsigned long PushOnBuffer(unsigned char *buffer, unsigned long bufferOffset, char value);
 
         const char* SERIAL_DEV = "/dev/ttyACM0";
@@ -73,10 +74,11 @@ namespace AC {
         int _portHandle;
         bool _deviceConfigured = false;
 
-
-
         thread _processThread;
         bool _threadActive = false;
+
+        const static int CONFIG_FRAME_SERIAL_RX_SIZE = 64;
+        const static int COMMAND_BUFFER_OFFSET = 3;
     };
 }
 #endif // TEENSYLIGHTCONNECTOR_H
